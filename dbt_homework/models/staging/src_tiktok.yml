@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: tiktok
+    description: raw tiktok campaign data
+    project: airbyte-cloud-storage
+    dataset: raw
+
+    tables:
+      - name: _airbyte_raw_tiktok_ads_reports
+        description: >
+          raw tiktok campaign data

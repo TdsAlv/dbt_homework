@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: TA_stg_tiktok__ads_report
+    description: 'Cleaned up version of raw data from Tiktok. JSON data is unnested and flattened in here.'
+    columns:
+      - name: adgroup_id
+        description: 'uniquelly identifies an adgroup'
+        tests:
+          - unique
+          - not_null
+      - name: campaign_id
+        description: 'uniquelly identifies a campaign'
+        tests:
+          - unique
+          - not_null
+      - name: campaign_name
+        description: 'name of the campaign'
+      - name: cpc
+        description: 'CPC = Cost Per Click. Total cost divided by total number of clicks.'
+      - name: cost
+        description: 'Cost. Amount spent on an advertisement'
+      - name: conversions
+        description: 'Conversions that happened after clicking through an advertisement.'
+      - name: clicks
+        description: 'Total number of clicks on an advertisement.'
+      - name: ad_id
+        description: 'uniquelly identifies an advertisement'
+      - name: stat_time_day
+        description: 'timestamp when there was a impression on an ad'
+      - name: airbyte_row_id
+        description: 'a unique id for each data row that is created by Airbyte (EL tool)'
+      - name: pulled_from_data_source_at
+        description: 'timestamp of when Airbyte pulled the data from the source system.'
