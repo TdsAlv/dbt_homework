@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: TA_mart_tiktok_campaign_perf
+    description: >
+      Tiktok campaign performance. Shows key metrics:
+        Impressions, Clicks, Conversions, Cost, CPC (Cost per Click), CPA (Cost per Conversion)
+    columns:
+      - name: metrics_date
+        description: 'Time period for collected data (day)'
+      - name: campaign_name
+        description: 'Name of the Tiktok campaign.'
+      - name: impressions
+        description: 'Number of times an advertisement has been seen.'
+      - name: clicks
+        description: 'Total number of clicks on an advertisement.'
+      - name: conversions
+        description: 'Conversions that happened after clicking through an advertisement.'
+      - name: cost
+        description: 'Cost. Amount spent on an advertisement'
+      - name: cpc
+        description: 'CPC = Cost Per Click. Total cost divided by total number of clicks.'
+      - name: cpa
+        description: 'CPA = Cost per acquisition. Total cost divided by total number of conversions.'
