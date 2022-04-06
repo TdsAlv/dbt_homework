@@ -10,5 +10,18 @@ Step 2: Stage raw data.
 First we flatten the JSON data into separate columns, then do some column renaming.
 stg_tiktok\_\_ads_report.sql file co
 
-Step 3: Create fact table for metrics.
-Pull metrics into fct_advertising_metrics table.
+Step 3: Aggregate campaign data.
+
+Last step: Make models incremental.
+According to dbt documentation on incremental models, dbt will run transformation on full data the first time it runs. Next time it will only transform the rows that we tell it to.
+This is done via is_incremental() macro, which should wrap a WHERE clause that would filter for the newly added rows.
+I will assume that **stat_time_day** will be the field to filter for new rows as new events will be added every day.
+
+{% if is_incremental() %}
+
+-- this filter will only be applied on an incremental run
+where stat_time_day > (select max(stat_time_day) from {{ this }})
+
+{% endif %}
+
+Also there is an optional parameter of 'unique_key' for incremental models, which should make sure that no duplicate rows are inserted into target table, and instead if duplicate key is found, the row in target table is updated. (at least I think this is how it works :) )
