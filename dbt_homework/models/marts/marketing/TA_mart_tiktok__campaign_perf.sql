@@ -5,25 +5,18 @@
     )
 }}
 
--- t1 will be just used for adding a surrogate key to check uniqueness and for checking which new rows have been
--- added to our staging table
+-- temp table so that we could check for last timestamp of pulled data
+-- unique_row_id will be used to not add duplicate data
 with t1 as (
-    select
-        -- a row can be uniquely identified by ad_id + metrics_timestamp combination
+    select 
+        max(pulled_from_data_source_at) as pulled_from_data_source_at,
         {{ dbt_utils.surrogate_key(['metrics_timestamp', 'ad_id']) }} as unique_row_id,
-        *
-    from {{ ref('TA_stg_tiktok__ads_report')}}
-
-
-    {% if is_incremental() %}
-      
-      -- just as with the staging model we check for new rows by looking at 'pulled_from_data_source' timestamp
-      where pulled_from_data_source_at > (select max(pulled_from_data_source_at) from {{ this }})
-
-    {% endif %}
+    
+    from {{ ref('TA_stg_tiktok__ads_report') }}
 ),
 
-final as (
+aggregates as (
+
     select
         DATE(metrics_timestamp) as metrics_date,
         campaign_name,
@@ -33,8 +26,24 @@ final as (
         sum(cost) as cost,
         round(sum(cost) / NULLIF(sum(clicks),0), 2) as cpc,
         round(sum(cost) / NULLIF(sum(conversions),0), 2) as cpa
-    from t1
+
+    from {{ ref('TA_stg_tiktok__ads_report') }}
+
+
+    {% if is_incremental() %}
+      
+      -- check if new data is available in intermediate table
+        where pulled_from_data_source_at > (select max(pulled_from_data_source_at) from {{ this }})
+
+    {% endif %}
+
     group by metrics_date, campaign_name
+),
+
+-- select everything from aggregates and add the last pull timestamp with unique_row_id
+final as (
+    select 
+        aggregates.*, t1.* from aggregates, t1
 )
 
 select * from final

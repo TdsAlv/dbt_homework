@@ -1,7 +1,6 @@
 {{
     config(
-        materialized='incremental',
-        unique_key='unique_airbyte_id'
+        materialized='incremental'
     )
 }}
 
@@ -26,7 +25,7 @@ with final as (
 
     -- check the last 'pulled_from_data_source' timestamp in our staging table 
     -- and then check if there are newer timestamps in the source data, if there are, we take those rows to be transformed.
-    where pulled_from_data_source_at > (select max(pulled_from_data_source_at) from {{ this }})
+    where _airbyte_emitted_at > (select max(pulled_from_data_source_at) from {{ this }})
 
     {% endif %}
 )
