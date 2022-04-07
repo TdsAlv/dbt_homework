@@ -1,6 +1,6 @@
 # dbt_homework
 
-homework for analytics engineer position
+## Homework for analytics engineer position
 
 **Step 1**: Register source in dbt.
 We are getting a dump from Airbyte, and the column with data is **\_airbyte_dat**a** which contains JSON objects.
@@ -58,6 +58,10 @@ Airflow could be used as pipeline orchestrator with an integration to Slack for 
 I've heard about some other tools to measure data pipeline performance (Prometheus for monitoring + Grafana for visualization of those monitoring metrics), but I have not used or seen them in action.
 
 **Which data schema do you think is best?**
-Tough question - I don't have a good answer to that. Looks like STAR schema is still quite popular, although it was designed when data storage was costly, which is not the case right now. I guess the main advantage of it right now is readability - organizing your data around events (facts) and description of those events (dimensions).
+Tough question - I don't have a good answer to that.
+
+Looks like STAR schema is still quite popular, although it was designed when data storage was costly, which is not the case right now. I guess the main advantage of it right now is readability - organizing your data around events (facts) and description of those events (dimensions).
+
 On one end of the spectrum there seems to be people who like Data Vault, but that seems to be a very cumbersome modeling technique.
+
 On the other end, some people are just pushing for OBT (one big table), as with current data warehouses the speed may not be an issue.
