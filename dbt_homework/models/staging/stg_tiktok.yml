@@ -4,16 +4,15 @@ models:
   - name: TA_stg_tiktok__ads_report
     description: 'Cleaned up version of raw data from Tiktok. JSON data is unnested and flattened in here.'
     columns:
+      - name: unique_airbyte_id
+        description: 'a unique id for each data row that is created by Airbyte (EL tool)'
+        tests:
+          - unique
+          - not_null
       - name: adgroup_id
-        description: 'uniquelly identifies an adgroup'
-        tests:
-          - unique
-          - not_null
+        description: 'uniquely identifies an adgroup'
       - name: campaign_id
-        description: 'uniquelly identifies a campaign'
-        tests:
-          - unique
-          - not_null
+        description: 'uniquely identifies a campaign'
       - name: campaign_name
         description: 'name of the campaign'
       - name: cpc
@@ -28,9 +27,10 @@ models:
         description: 'Total number of clicks on an advertisement.'
       - name: ad_id
         description: 'uniquelly identifies an advertisement'
-      - name: stat_time_day
+      - name: metrics_timestamp
         description: 'timestamp when there was a impression on an ad'
-      - name: airbyte_row_id
-        description: 'a unique id for each data row that is created by Airbyte (EL tool)'
       - name: pulled_from_data_source_at
         description: 'timestamp (UTC) of when Airbyte pulled the data from the source system.'
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: 'clicks >= 0'

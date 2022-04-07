@@ -10,3 +10,18 @@ sources:
       - name: _airbyte_raw_tiktok_ads_reports
         description: >
           raw tiktok campaign data
+        columns:
+          - name: _airbyte_ab_id
+            description: A uuid assigned by Airbyte to each event that is processed
+            tests:
+              - unique
+              - not_null
+              - relationships:
+                  to: ref('TA_stg_tiktok__ads_report')
+                  field: unique_airbyte_id
+
+          - name: _airbyte_emitted_at
+            description: A timestamp representing when the event was pulled from the data source.
+
+          - name: _airbyte_data
+            description: Raw data from source (JSON blob).
