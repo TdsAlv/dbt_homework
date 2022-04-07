@@ -4,15 +4,14 @@
 {{
     config(
         materialized='incremental',
-        unique_key='airbyte_json_hash'
+        unique_key='_unique_data_id'
     )
 }}
 
-with final as (
-    select 
-        _airbyte_ab_id as unique_airbyte_id,
-        _airbyte_emitted_at as pulled_from_data_source_at,
-        {{ dbt_utils.surrogate_key(['_airbyte_data']) }} as airbyte_json_hash,
+with flattened as (
+    select
+        _airbyte_ab_id as _unique_airbyte_id,
+        _airbyte_emitted_at as _pulled_from_data_source_at,
         PARSE_TIMESTAMP('"%Y-%m-%d %H:%M:%S"', json_extract(_airbyte_data, '$.dimensions.stat_time_day')) as metrics_timestamp,
         json_extract(_airbyte_data, '$.metrics.campaign_id') as campaign_id,
         json_extract(_airbyte_data, '$.metrics.campaign_name') as campaign_name,
@@ -23,14 +22,23 @@ with final as (
         CAST(json_extract(_airbyte_data, '$.metrics.conversion') AS integer) as conversions,
         CAST(json_extract(_airbyte_data, '$.metrics.spend') AS numeric) as cost,
         CAST(json_extract(_airbyte_data, '$.metrics.cpc') AS numeric) as cpc
-        
+
     from {{ source('tiktok', '_airbyte_raw_tiktok_ads_reports') }}
+), 
+
+final as (
+    select 
+        {{ dbt_utils.current_timestamp() }} as _loaded_at,
+        {{ dbt_utils.surrogate_key(['campaign_id','adgroup_id', 'ad_id', 'metrics_timestamp']) }} as _unique_data_id,
+        *
+        
+    from flattened
 
     {% if is_incremental() %}
 
     -- check the last 'pulled_from_data_source' timestamp in our staging table 
     -- and then check if there are newer timestamps in the source data, if there are, we take those rows to be transformed.
-    where _airbyte_emitted_at > (select max(pulled_from_data_source_at) from {{ this }})
+    where _pulled_from_data_source_at > (select max(_pulled_from_data_source_at) from {{ this }})
 
     {% endif %}
 )

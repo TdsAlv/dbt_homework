@@ -19,8 +19,20 @@ By looking at the **\_airbyte_emitted_at** field it seems that the pulling of da
 
 So I'll use this field as a cursor for the incremental model.
 
+Dealing with updated data.
+
+If for whatever reason we get campaign data which is not new, but older data, which may have been 'corrected', we will update old records instead of creating a new row.
+
+In staging:
+
+A unique record is assumed to be campaign_id + adgroup_id + ad_id + metrics_timestamp combination. A hash of these values will be called **\_unique_data_id**. We will use dbts unique_key='\_unique_data_id' option in the config so that if new data with the same hash comes in, it will update an existing record instead of creating a new one.
+
+In marts:
+
+A unique record is assumed to be metrics_date + campaign_name combination. Since this report is aggregated for each day for each campaign, having two rows for same day and campaign should not happen. Again we will use hash to check if newly arriving data should update an existing record.
+
 **Step 5**: Add tests.
-Testing source: test if \_airbyte_ab_id is unique aad not_null. Test relationship: we want that each '\_airbyte_ab_id' in the source, exists as an id in staging tables 'unique_airbyte_id'.
+Testing source: test if \_airbyte_ab_id is unique and not_null.
 
 Testing stg: test if unique_airbyte_id is unique and not_null, test if clicks amount is non-negative (using dbt_utils.expression_is_true).
 
@@ -36,11 +48,11 @@ I tried to create models that dbt documentation says we should pretty much alway
 Models themselves should be created by using CTEs.
 For each model we should provide some documentation on the columns and at least a few tests.
 
-I've used source and ref macros in the project so that in case the table names change, you only need to change it in one place (yaml configuration)
+Use source and ref macros in the project so that in case the table names change, you only need to change it in one place (yaml configuration)
 
 At least one test done on all levels (source/staging/marts)
 
-Also I've tried to use some built-in dbt functions like dbt_utils.expression_is_true for tests.
+Also I've tried to use some built-in dbt functions like dbt_utils.expression_is_true for tests and dbt_utils.surrogate_key for hashes of data.
 
 **Describe how you would monitor that everything is ok and ensure data quality. Is the dbt tool enough for that? What other solutions would you use?**
 I guess one of the first steps would be to have separate dev and prod environments, where analytics engineer does all the development in dev, making sure all the tests pass before implementing the solution to production.
@@ -53,7 +65,7 @@ There also seems to be a popular python package 'great-expectations' for some ad
 These tools will test data, but they do not check if the whole data pipeline succeeded or not.
 
 Airflow could be used as pipeline orchestrator with an integration to Slack for example, so that if an error occurs anywhere in the pipeline, data engineers would be notified via message.
-I've heard about some other tools to measure data pipeline performance (Prometheus for monitoring + Grafana for visualization of those monitoring metrics), but I have not used or seen them in action.
+I've heard about some other tools to measure data pipeline performance (Prometheus for monitoring + Grafana for visualization of those monitoring metrics), but I have not used them.
 
 **Which data schema do you think is best?**
 Tough question - I don't have a good answer to that.

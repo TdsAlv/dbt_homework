@@ -1,6 +1,7 @@
 {{
     config(
-        materialized='incremental'
+        materialized='incremental',
+        unique_key='unique_data_id'
     )
 }}
 
@@ -23,7 +24,7 @@ with aggregates as (
     {% if is_incremental() %}
       
       -- check if new data is available in intermediate table
-        where pulled_from_data_source_at > (select max(pulled_from_data_source_at) from {{ this }})
+        where _pulled_from_data_source_at > (select max(_pulled_from_data_source_at) from {{ this }})
 
     {% endif %}
 
@@ -33,25 +34,21 @@ with aggregates as (
 -- temp table so that we could check for last timestamp of pulled data
 t1 as (
     select 
-        max(pulled_from_data_source_at) as pulled_from_data_source_at,
+        max(_pulled_from_data_source_at) as _pulled_from_data_source_at,
     from {{ ref('TA_stg_tiktok__ads_report') }}
 ),
 
 -- select everything from aggregates and add the last pull timestamp 
 subfinal as (
     select 
-        aggregates.*, t1.pulled_from_data_source_at from aggregates, t1
+        aggregates.*, t1._pulled_from_data_source_at from aggregates, t1
 ),
 
-
--- here I created a 'unique_row_id' which is a hash of metrics_date and campaign_name
--- this will be used in tests to check if our Date & Campaign name combination is unique.
--- if its not unique, this means we have duplicate data, and test will fail. 
--- In that case it may be a good idea to run a full-refresh
+-- add a unique_data_id
 final as (
     select 
         *,
-        {{ dbt_utils.surrogate_key(['metrics_date', 'campaign_name']) }} as unique_row_id
+        {{ dbt_utils.surrogate_key(['metrics_date', 'campaign_name']) }} as unique_data_id
     from subfinal
 )
 

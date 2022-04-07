@@ -16,9 +16,6 @@ sources:
             tests:
               - unique
               - not_null
-              - relationships:
-                  to: ref('TA_stg_tiktok__ads_report')
-                  field: unique_airbyte_id
 
           - name: _airbyte_emitted_at
             description: A timestamp representing when the event was pulled from the data source.
