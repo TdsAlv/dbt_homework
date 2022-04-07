@@ -19,7 +19,14 @@ By looking at the **\_airbyte_emitted_at** field it seems that the pulling of da
 So I'll use this field as a cursor for the incremental model.
 
 Also there is an optional parameter of 'unique_key' for incremental models, which should make sure that no duplicate rows are inserted into target table, and instead if duplicate key is found, the row in target table is updated. (at least I think this is how it works :) )
-For this we will use the **\_airbyte_ab_id** field, which is renamed to **unique_airbyte_id** in the staging table, and for final report table I wanted to try dbt_utils.surrogate_key() macro to create a new surrogate key which is hashing ad_id and metrics_timestamp values to produce a unique_row_id.
+For this we will use the **\_airbyte_ab_id** field, which is renamed to **unique_airbyte_id** in the staging table.
+
+Then I've created an intermediate model 'TA_tiktok_intermediate\_\_incremental_check', which does 2 things:
+
+- first it scans the staging table and checks for only new rows
+- it also adds a new column 'unique_row_id', which identifies each row as unique.
+
+And for final report table I wanted to try dbt_utils.surrogate_key() macro to create a new surrogate key which is hashing ad_id and metrics_timestamp values to produce a unique_row_id.
 
 **Step 5**: Add tests.
 Testing source: test if \_airbyte_ab_id is unique aad not_null. Test relationship: we want that each '\_airbyte_ab_id' in the source, exists as an id in staging tables 'unique_airbyte_id'.
