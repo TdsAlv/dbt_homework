@@ -1,13 +1,18 @@
+-- unique_key will make sure that if we get duplicate records in incremental loads
+-- they will update the previous data, and not create a new row
+
 {{
     config(
-        materialized='incremental'
+        materialized='incremental',
+        unique_key='airbyte_json_hash'
     )
 }}
 
 with final as (
     select 
-        _airbyte_ab_id as unique_airbyte_id, 
+        _airbyte_ab_id as unique_airbyte_id,
         _airbyte_emitted_at as pulled_from_data_source_at,
+        {{ dbt_utils.surrogate_key(['_airbyte_data']) }} as airbyte_json_hash,
         PARSE_TIMESTAMP('"%Y-%m-%d %H:%M:%S"', json_extract(_airbyte_data, '$.dimensions.stat_time_day')) as metrics_timestamp,
         json_extract(_airbyte_data, '$.metrics.campaign_id') as campaign_id,
         json_extract(_airbyte_data, '$.metrics.campaign_name') as campaign_name,

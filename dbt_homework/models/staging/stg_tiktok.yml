@@ -9,28 +9,45 @@ models:
         tests:
           - unique
           - not_null
+
+      - name: airbyte_json_hash
+        description: 'A hash value of JSON blob. Used to check for duplicate data.'
+        tests:
+          - unique
+
       - name: adgroup_id
         description: 'uniquely identifies an adgroup'
+
       - name: campaign_id
         description: 'uniquely identifies a campaign'
+
       - name: campaign_name
         description: 'name of the campaign'
+
       - name: cpc
         description: 'CPC = Cost Per Click. Total cost divided by total number of clicks.'
+
       - name: cost
         description: 'Cost. Amount spent on an advertisement'
+
       - name: conversions
         description: 'Conversions that happened after clicking through an advertisement.'
+
       - name: impressions
         description: 'Number of times an advertisement has been seen.'
+
       - name: clicks
         description: 'Total number of clicks on an advertisement.'
+
       - name: ad_id
-        description: 'uniquelly identifies an advertisement'
+        description: 'Uniquelly identifies an advertisement'
+
       - name: metrics_timestamp
-        description: 'timestamp when there was a impression on an ad'
+        description: 'Timestamp when there was a impression on an ad'
+
       - name: pulled_from_data_source_at
-        description: 'timestamp (UTC) of when Airbyte pulled the data from the source system.'
+        description: 'Timestamp (UTC) of when Airbyte pulled the data from the source system.'
+
     tests:
       - dbt_utils.expression_is_true:
           expression: 'clicks >= 0'
