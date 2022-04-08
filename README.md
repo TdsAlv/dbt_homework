@@ -8,7 +8,7 @@ So the first step would be to register the **raw.\_airbyte_raw_tiktok_ads_report
 
 **Step 2**: Stage raw data.
 We flatten the JSON data into tabular format, then do some column renaming and data type recasting.
-Also adding a hash of JSON blob, this will make sure that on incremental loads, the rows are updated and not newly created.
+Also adding a \_unique_data_id which is a hash to identify duplicate records, this will make sure that on incremental loads, if we get updates for old rows, they are updated and not newly created.
 
 **Step 3**: Aggregate campaign data. Metrics grouped by each day and campaign. Added NULLIF() function in case we get 0 clicks or conversions in a day, so that we don't get division by 0.
 
@@ -36,7 +36,7 @@ Testing source: test if \_airbyte_ab_id is unique and not_null.
 
 Testing stg: test if unique_airbyte_id is unique and not_null, test if clicks amount is non-negative (using dbt_utils.expression_is_true).
 
-Testing mart: test if date & campaign combination is unique. Report shows data by day for each campaign, so we don't want duplicate dates for a single campaign somehow to happen, and our test should fail so that we can be alerted and maybe do a full refresh. Also we can test if impressions are non-negative.
+Testing mart: test if date & campaign combination (\_unique_data_id) is unique. Report shows data by day for each campaign, so we don't want duplicate dates for a single campaign somehow to happen, and our test should fail so that we can be alerted and maybe do a full refresh. Also we can test if impressions are non-negative.
 
 **Comment what data modeling and dbt best practices you use and why**
 I tried to create models that dbt documentation says we should pretty much always have:
@@ -61,7 +61,7 @@ Some sort of CI/CD process might be implemented for this (like pushing code to g
 
 There also seems to be a popular python package 'great-expectations' for some additional statistical tests on data. It has been ported to dbt as dbt_expectations, but I haven't used it, so not sure what additional benefits it gives.
 
-These tools will test data, but they do not check if the whole data pipeline succeeded or not.
+These tools will test data, but they do not check if the whole data pipeline succeeded or not, so maybe the source system or EL tool is at fault in the first place.
 
 Airflow could be used as pipeline orchestrator with an integration to Slack for example, so that if an error occurs anywhere in the pipeline, data engineers would be notified via message.
 I've heard about some other tools to measure data pipeline performance (Prometheus for monitoring + Grafana for visualization of those monitoring metrics), but I have not used them.
@@ -71,6 +71,6 @@ Tough question - I don't have a good answer to that.
 
 Looks like STAR schema is still quite popular, although it was designed when data storage was costly, which is not the case right now. I guess the main advantage of it right now is readability - organizing your data around events (facts) and description of those events (dimensions).
 
-On one end of the spectrum there seems to be people who like Data Vault, but that seems to be a very cumbersome modeling technique.
+On one end of the spectrum there seems to be people who like Data Vault, but that seems to be a very cumbersome modeling technique and I know too little about its pros/cons.
 
-On the other end, some people are just pushing for OBT (one big table), as with current data warehouses the speed may not be an issue.
+On the other end, some people are just pushing for OBT (one big table), as with current data warehouses the speed of scanning big tables may not be an issue.

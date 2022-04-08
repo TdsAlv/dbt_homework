@@ -4,16 +4,19 @@ models:
   - name: TA_stg_tiktok__ads_report
     description: 'Cleaned up version of raw data from Tiktok. JSON data is unnested and flattened in here.'
     columns:
-      - name: _unique_airbyte_id
-        description: 'a unique id for each data row that is created by Airbyte (EL tool)'
-        tests:
-          - unique
-          - not_null
+      - name: loaded_at
+        description: 'A timestamp (UTC) which shows when this record had been loaded into this table'
 
       - name: _unique_data_id
         description: A hash value of 'campaign_id','adgroup_id', 'ad_id', 'metrics_timestamp'. Used to check for duplicate data.
         tests:
           - unique
+
+      - name: _unique_airbyte_id
+        description: 'a unique id for each data row that is created by Airbyte (EL tool)'
+        tests:
+          - unique
+          - not_null
 
       - name: adgroup_id
         description: 'uniquely identifies an adgroup'
