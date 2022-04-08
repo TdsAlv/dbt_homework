@@ -56,7 +56,6 @@ Also I've tried to use some built-in dbt functions like dbt_utils.expression_is_
 
 **Describe how you would monitor that everything is ok and ensure data quality. Is the dbt tool enough for that? What other solutions would you use?**
 I guess one of the first steps would be to have separate dev and prod environments, where analytics engineer does all the development in dev, making sure all the tests pass before implementing the solution to production.
-That would be at least the first step to ensuring data quality.
 
 Some sort of CI/CD process might be implemented for this (like pushing code to git development branch, doing a pull request to main branch, which when accepted would trigger additional tests or something like that)
 
