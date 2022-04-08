@@ -31,6 +31,6 @@ models:
         description: 'CPA = Cost per acquisition. Total cost divided by total number of conversions.'
 
       - name: unique_row_id
-        description: 'A Date&Campaign combination hash value. This is used to make sure the report does not have duplicates'
+        description: "A hash value of ['metrics_date', 'campaign_name']. This is used to make sure the report does not have duplicates"
         tests:
           - unique

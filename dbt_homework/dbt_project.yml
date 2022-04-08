@@ -31,6 +31,7 @@ clean-targets: # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 models:
   dbt_homework:
-    # Config indicated by + and applies to all files under models/example/
-    example:
-      +materialized: view
+    marts:
+      +materialized: incremental
+    staging:
+      +materialized: incremental

@@ -26,13 +26,23 @@ with flattened as (
     from {{ source('tiktok', '_airbyte_raw_tiktok_ads_reports') }}
 ), 
 
-final as (
+added_metadata as (
     select 
         {{ dbt_utils.current_timestamp() }} as _loaded_at,
         {{ dbt_utils.surrogate_key(['campaign_id','adgroup_id', 'ad_id', 'metrics_timestamp']) }} as _unique_data_id,
         *
-        
     from flattened
+),
+
+deduplicated as (
+    select * from
+        (select *, row_number() over (partition by _unique_data_id order by _pulled_from_data_source_at desc) as rn
+        from added_metadata)
+    where rn = 1
+),
+
+final as (
+    select * except (rn) from deduplicated
 
     {% if is_incremental() %}
 

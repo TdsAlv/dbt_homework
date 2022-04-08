@@ -8,7 +8,9 @@ So the first step would be to register the **raw.\_airbyte_raw_tiktok_ads_report
 
 **Step 2**: Stage raw data.
 We flatten the JSON data into tabular format, then do some column renaming and data type recasting.
-Also adding a \_unique_data_id which is a hash to identify duplicate records, this will make sure that on incremental loads, if we get updates for old rows, they are updated and not newly created.
+
+I saw that there are some duplicate data in there (duplicate as ad_id + metrics_date combination). For this I created a \_unique_data_id hash value of these 2 columns.
+It will be used to deduplicate existing raw data, and also as a unique_key in dbt config, which will allow dbt to overwrite existing rows if updated data from the past comes in.
 
 **Step 3**: Aggregate campaign data. Metrics grouped by each day and campaign. Added NULLIF() function in case we get 0 clicks or conversions in a day, so that we don't get division by 0.
 

@@ -3,13 +3,13 @@ version: 2
 sources:
   - name: tiktok
     description: raw tiktok campaign data
-    project: airbyte-cloud-storage
+    project: homework-data2020
     dataset: raw
 
     tables:
       - name: _airbyte_raw_tiktok_ads_reports
         description: >
-          raw tiktok campaign data
+          Raw tiktok campaign data
         columns:
           - name: _airbyte_ab_id
             description: A uuid assigned by Airbyte to each event that is processed
