@@ -39,6 +39,7 @@ Testing stg: test if unique_airbyte_id is unique and not_null, test if clicks am
 Testing mart: test if date & campaign combination (\_unique_data_id) is unique. Report shows data by day for each campaign, so we don't want duplicate dates for a single campaign somehow to happen, and our test should fail so that we can be alerted and maybe do a full refresh. Also we can test if impressions are non-negative.
 
 **Comment what data modeling and dbt best practices you use and why**
+
 I tried to create models that dbt documentation says we should pretty much always have:
 
 - staging model, where it is a 1:1 match with source data just with some cleaning (renaming, recasting or JSON flattening as in this case)
@@ -55,6 +56,7 @@ At least one test done on all levels (source/staging/marts)
 Also I've tried to use some built-in dbt functions like dbt_utils.expression_is_true for tests and dbt_utils.surrogate_key for hashes of data.
 
 **Describe how you would monitor that everything is ok and ensure data quality. Is the dbt tool enough for that? What other solutions would you use?**
+
 I guess one of the first steps would be to have separate dev and prod environments, where analytics engineer does all the development in dev, making sure all the tests pass before implementing the solution to production.
 
 Some sort of CI/CD process might be implemented for this (like pushing code to git development branch, doing a pull request to main branch, which when accepted would trigger additional tests or something like that)
@@ -67,6 +69,7 @@ Airflow could be used as pipeline orchestrator with an integration to Slack for 
 I've heard about some other tools to measure data pipeline performance (Prometheus for monitoring + Grafana for visualization of those monitoring metrics), but I have not used them.
 
 **Which data schema do you think is best?**
+
 Tough question - I don't have a good answer to that.
 
 Looks like STAR schema is still quite popular, although it was designed when data storage was costly, which is not the case right now. I guess the main advantage of it right now is readability - organizing your data around events (facts) and description of those events (dimensions).
