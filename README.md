@@ -21,7 +21,7 @@ By looking at the **\_airbyte_emitted_at** field it seems that the pulling of da
 
 So I'll use this field as a cursor for the incremental model.
 
-Dealing with updated data.
+**Dealing with updated data.**
 
 If for whatever reason we get campaign data which is not new, but older data, which may have been 'corrected', we will update old records instead of creating a new row.
 
@@ -31,7 +31,7 @@ A unique record is assumed to be campaign_id + adgroup_id + ad_id + metrics_time
 
 In marts:
 
-A unique record is assumed to be metrics_date + campaign_name combination. Since this report is aggregated for each day for each campaign, having two rows for same day and campaign should not happen. Again we will use hash to check if newly arriving data should update an existing record.
+A unique record is assumed to be metrics_date + campaign_name combination. This is an aggregate table so if duplicate data arrives to 'correct' the current data, we should check what timestamp that data is, extract day from that timestamp and re-fetch data for that full day from staging layer. Finally we will use hash of metrics_date + campaign_name to check if newly arriving data should update an existing record.
 
 **Step 5**: Add tests.
 Testing source: test if \_airbyte_ab_id is unique and not_null.
@@ -40,11 +40,13 @@ Testing stg: test if unique_airbyte_id is unique and not_null, test if clicks am
 
 Testing mart: test if date & campaign combination (\_unique_data_id) is unique. Report shows data by day for each campaign, so we don't want duplicate dates for a single campaign somehow to happen, and our test should fail so that we can be alerted and maybe do a full refresh. Also we can test if impressions are non-negative.
 
+---
+
 **Comment what data modeling and dbt best practices you use and why**
 
 I tried to create models that dbt documentation says we should pretty much always have:
 
-- staging model, where it is a 1:1 match with source data just with some cleaning (renaming, recasting or JSON flattening as in this case)
+- staging model, where it is a 1:1 match with source data just with some cleaning (renaming, recasting, deduplicating or JSON flattening as in this case)
 
 - marts model, where we usually should provide fact and dimension tables, but my experience with those is limited as I'm not exactly sure if we should use them with event data like this. So in this case I just produced the final report in the marts directory.
 
