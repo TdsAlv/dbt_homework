@@ -2,3 +2,4 @@ env/
 dbt_homework/target/
 dbt_homework/dbt_packages/
 dbt_homework/logs/
+logs/
